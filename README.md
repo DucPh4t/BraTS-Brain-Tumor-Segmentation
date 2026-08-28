@@ -40,7 +40,7 @@ The main training benchmark is BraTS 2020. The best trained model is then evalua
 - [Scripts](#scripts)
 - [Reproducibility Notes](#reproducibility-notes)
 - [Limitations](#limitations)
-- [Citation and License](#citation-and-license)
+- [License](#license)
 
 ## Quickstart
 
@@ -377,18 +377,6 @@ python scripts/visualize_outliers.py
 - Extremely small enhancing tumor regions can be missed entirely. For example, `BraTS20_Training_307` contains only about 32 ET voxels and is a documented ET failure case.
 - Kaggle session time limits may require checkpoint resume or shorter slice ranges for large experiment sweeps.
 
-## Citation and License
+## License
 
 This project is released under the [MIT License](LICENSE).
-
-If this repository is useful for your work, please cite:
-
-```bibtex
-@misc{nguyen_brats_53exp_2026,
-  author = {Nguyen Duc Phat},
-  title = {Multi-Modal Brain Tumor Segmentation on BraTS 2020 and BraTS 2023 with Region-Hierarchy Consistency and 2.5D Mamba Adapters},
-  year = {2026},
-  publisher = {GitHub},
-  howpublished = {\url{https://github.com/DucPh4t/BraTS-Brain-Tumor-Segmentation}}
-}
-```
