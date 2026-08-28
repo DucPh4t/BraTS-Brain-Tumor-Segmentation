@@ -3,7 +3,7 @@ Mô tả: Chạy đánh giá chéo (cross-dataset evaluation) của mô hình đ
 Đầu vào:
     --checkpoint: Đường dẫn đến file trọng số .pth của mô hình.
     --config: Đường dẫn đến file cấu hình YAML tương ứng.
-    --data-root: Đường dẫn đến thư mục chứa dữ liệu BraTS 2023 GLI.
+    --dataset_root: Đường dẫn đến thư mục chứa dữ liệu BraTS 2023 GLI.
 Đầu ra:
     In ra màn hình kết quả trung bình 3D Dice và khoảng cách Hausdorff HD95. Lưu báo cáo chi tiết và file metrics JSON.
 """
@@ -309,7 +309,11 @@ def main():
     if args.dataset_root:
         brats23_root = args.dataset_root
     else:
-        brats23_root = "/Users/nguyenducphat/Projects/ĐATN MRI/MRI dataset/BraTS2023_GLI/ASNR-MICCAI-BraTS2023-GLI-Challenge-TrainingData"
+        brats23_root = os.environ.get("BRATS2023_GLI_ROOT")
+    if not brats23_root:
+        raise SystemExit(
+            "Missing BraTS 2023 dataset path. Pass --dataset_root or set BRATS2023_GLI_ROOT."
+        )
     config["data"]["root_dir"] = brats23_root
     config["data"]["cache_volumes"] = False # Không cache tránh OOM
     config["data"]["dataset_name"] = "BraTS2023 GLI"

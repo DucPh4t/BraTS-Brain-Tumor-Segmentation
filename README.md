@@ -52,7 +52,10 @@ source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 
+# Edit data.root_dir in the selected YAML config before training.
 python main.py --config configs/exp043.yaml --mode train
+
+# Run evaluation after a checkpoint has been created.
 python main.py --config configs/exp043.yaml --mode eval
 ```
 
@@ -208,10 +211,10 @@ $$
 
 | Model Architecture | Config | WT Dice | TC Dice | ET Dice | Mean Dice |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| Baseline 2D U-Net | `exp001` | 0.8650 | 0.7720 | 0.7240 | 0.7870 |
-| Attention U-Net 2D | `exp018` | 0.8926 | 0.8418 | 0.7698 | 0.8347 |
-| Disentangled 2D Fusion | `exp021` | 0.9015 | 0.8502 | 0.7810 | 0.8442 |
-| Region Heads + Hierarchy Consistency | `exp036` | 0.9072 | 0.8590 | 0.7915 | 0.8526 |
+| Baseline 2D U-Net | `exp001` | 0.8546 | 0.8039 | 0.7847 | 0.8144 |
+| Attention U-Net 2D | `exp018` | 0.9047 | 0.8440 | 0.7733 | 0.8407 |
+| Disentangled 2D Fusion | `exp021` | 0.9100 | 0.8562 | 0.7821 | 0.8494 |
+| Region Heads + Hierarchy Consistency | `exp036` | 0.9098 | 0.8592 | 0.7884 | 0.8525 |
 | ResNet34 Region-Heads U-Net | `exp043` | **0.9081** | **0.8642** | **0.7929** | **0.8551** |
 | Hybrid 2.5D Mamba Residual Adapter | `exp052` | 0.9017 | 0.8514 | 0.7766 | 0.8432 |
 
@@ -221,9 +224,9 @@ The `exp043` checkpoint was trained on BraTS 2020 and evaluated directly on 1,25
 
 | Dataset / Benchmark | WT Dice | TC Dice | ET Dice | Mean Dice | WT HD95 | TC HD95 | ET HD95 | Mean HD95 |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| BraTS 2020 test | 0.916 | 0.858 | 0.821 | 0.865 | 10.12 mm | 9.45 mm | 21.84 mm | 13.80 mm |
+| BraTS 2020 configured test split | 0.9081 | 0.8642 | 0.7929 | 0.8551 | 6.20 mm | 4.49 mm | 21.84 mm | 10.84 mm |
 | BraTS 2023 GLI zero-shot | **0.9017** | **0.8725** | **0.8261** | **0.8668** | **10.00 mm** | **9.15 mm** | **12.47 mm** | **10.54 mm** |
-| Delta | -0.0143 | +0.0145 | +0.0051 | +0.0018 | -0.12 mm | -0.30 mm | -9.37 mm | -3.26 mm |
+| Delta | -0.0064 | +0.0083 | +0.0332 | +0.0117 | +3.80 mm | +4.66 mm | -9.37 mm | -0.30 mm |
 
 These numbers should be interpreted with the exact preprocessing, checkpoint, thresholding, and post-processing settings used by the corresponding config and evaluation script.
 
