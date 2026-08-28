@@ -28,12 +28,14 @@ The main training benchmark is BraTS 2020. The best trained model is then evalua
 ## Table of Contents
 
 - [Quickstart](#quickstart)
+- [Hardware and OS Setup](#hardware-and-os-setup)
 - [Dataset Setup](#dataset-setup)
 - [Project Structure](#project-structure)
 - [Terminology and Metrics](#terminology-and-metrics)
 - [Experiment Roadmap](#experiment-roadmap)
 - [Model Design](#model-design)
 - [Results](#results)
+- [Known Failure Cases](#known-failure-cases)
 - [Usage](#usage)
 - [Scripts](#scripts)
 - [Reproducibility Notes](#reproducibility-notes)
@@ -72,6 +74,41 @@ For Mamba-based experiments (`exp052`, `exp053`) on NVIDIA CUDA environments suc
 
 ```bash
 pip install -r requirements-mamba.txt --no-build-isolation
+```
+
+## Hardware and OS Setup
+
+| Environment | Recommended setup | Notes |
+| :--- | :--- | :--- |
+| Windows + NVIDIA GPU | Python 3.10+, CUDA-compatible PyTorch, `pip install -r requirements.txt` | Recommended for full training and Mamba experiments. |
+| macOS Apple Silicon | Python 3.10+, PyTorch with MPS, `pip install -r requirements.txt` | Good for development and lighter 2D experiments. Mamba CUDA kernels are not expected to run on MPS. |
+| Kaggle / Colab GPU | NVIDIA GPU runtime, dataset mounted under `/kaggle/input` or `/content` | Use `--stop_epoch` and `--resume_path` to survive session limits. |
+
+macOS / Linux:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+Windows PowerShell:
+
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+Windows Command Prompt:
+
+```cmd
+python -m venv venv
+venv\Scripts\activate.bat
+python -m pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
 ## Dataset Setup
@@ -237,6 +274,15 @@ These numbers should be interpreted with the exact preprocessing, checkpoint, th
   <img src="outputs/figures/milestones_training_curves.png" width="48%" alt="Milestone training curves" />
 </p>
 
+## Known Failure Cases
+
+The project explicitly keeps difficult cases in the analysis instead of hiding them from the report. One important limitation is very small ET detection:
+
+| Case | Observation | Current behavior |
+| :--- | :--- | :--- |
+| `BraTS20_Training_307` | ET is extremely small, only about 32 voxels in the ground truth. | Several models preserve WT/TC reasonably well but miss ET, producing ET Dice `0.0`. This is a documented tiny-lesion failure mode. |
+| `BraTS20_Training_279` | Ground truth contains no ET. | Small false-positive ET regions can produce very large ET-HD95, so connected-component cleanup and thresholding must be reported carefully. |
+
 ## Usage
 
 ### Train a model
@@ -312,6 +358,7 @@ python scripts/visualize_outliers.py
 - Most experiments are 2D or 2.5D rather than full 3D, which reduces memory cost but may lose some volumetric context.
 - BraTS 2023 GLI is used for external validation; performance should not be interpreted as a replacement for a fully controlled multi-center test protocol.
 - HD95 can be highly sensitive to tiny false-positive or false-negative regions, especially for ET.
+- Extremely small enhancing tumor regions can be missed entirely. For example, `BraTS20_Training_307` contains only about 32 ET voxels and is a documented ET failure case.
 - Kaggle session time limits may require checkpoint resume or shorter slice ranges for large experiment sweeps.
 
 ## Citation and License
