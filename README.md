@@ -16,7 +16,7 @@
 - [🌟 Key Highlights](#-key-highlights)
 - [🩺 Terminology & Metrics Definitions](#-terminology--metrics-definitions)
 - [🏗️ Architectural Evolution & Experiment Roadmap](#️-architectural-evolution--experiment-roadmap)
-- [🧬 Architecture Diagram of Strongest Model (Exp052/Exp053)](#-architecture-diagram-of-strongest-model-exp052exp053)
+- [🧬 Architecture Diagram of Advanced 2.5D Mamba U-Net (Exp052/Exp053)](#-architecture-diagram-of-advanced-25d-mamba-u-net-exp052exp053)
 - [📐 Mathematical Formulations](#-mathematical-formulations)
 - [📊 Performance & Experimental Results](#-performance--experimental-results)
 - [🛠️ Complete Script Toolkit Reference](#️-complete-script-toolkit-reference)
@@ -93,9 +93,9 @@ flowchart TD
 
 ---
 
-## 🧬 Architecture Diagram of Strongest Model (Exp052/Exp053)
+## 🧬 Architecture Diagram of Advanced 2.5D Mamba U-Net (Exp052/Exp053)
 
-Dưới đây là sơ đồ chi tiết kiến trúc mô hình mạnh nhất đề xuất **Hybrid 2.5D Mamba U-Net với Ràng buộc Phân cấp Giải phẫu (Exp052 / Exp053)**:
+Dưới đây là sơ đồ chi tiết kiến trúc tiên phong ứng dụng State Space Models **Hybrid 2.5D Mamba U-Net với Ràng buộc Phân cấp Giải phẫu (Exp052 / Exp053)**:
 
 ```mermaid
 graph TD
