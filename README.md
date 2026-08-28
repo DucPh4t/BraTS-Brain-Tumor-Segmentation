@@ -153,7 +153,7 @@ $$
 \mathcal{L}_{\text{total}} = w_{\text{dice}} \mathcal{L}_{\text{Dice}} + w_{\text{bce}} \mathcal{L}_{\text{BCE}} + w_{\text{hier}} \mathcal{L}_{\text{hier}}
 $$
 
-*Trong đó các trọng số được cấu hình: $w_{\text{dice}} = 0.5$, $w_{\text{bce}} = 0.5$, và $w_{\text{hier}} = 0.1$.*
+*Trong đó các trọng số được cấu hình: $w_{dice} = 0.5$, $w_{bce} = 0.5$, và $w_{hier} = 0.1$.*
 
 ---
 
@@ -170,7 +170,27 @@ $$
 | **Hybrid 2.5D Mamba U-Net** (`exp043`) | 0.916 | 0.858 | 0.821 | **0.865** |
 | **Hierarchy-Consistent Mamba** (`exp052`) | **0.919** | **0.864** | **0.829** | **0.871** |
 
-### 2. Training Curves Visualizations
+### 2. External Generalization on BraTS 2023 GLI (Zero-shot Evaluation - 1,251 Cases)
+Đánh giá mô hình **Hybrid 2.5D Mamba U-Net (`Exp043`)** (chỉ huấn luyện trên BraTS 2020) trực tiếp trên toàn bộ 1,251 ca bệnh của tập dữ liệu ngoại lai **BraTS 2023 GLI** mà không fine-tune:
+
+| Dataset / Benchmark | WT Dice | TC Dice | ET Dice | Mean Dice | WT HD95 | TC HD95 | ET HD95 | Mean HD95 |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **BraTS 2020 Test** | 0.916 | 0.858 | 0.821 | 0.865 | 10.12 mm | 9.45 mm | 21.84 mm | 13.80 mm |
+| **BraTS 2023 GLI (Zero-shot)** | **0.9017** | **0.8725** | **0.8261** | **0.8668** | **10.00 mm** | **9.15 mm** | **12.47 mm** | **10.54 mm** |
+| **Biến thiên ($\Delta$)** | -0.0143 | **+0.0145** | **+0.0051** | **+0.0018** | **-0.12 mm** | **-0.30 mm** | **-9.37 mm** | **-3.26 mm** |
+
+> 🚀 **Kết luận**: Mô hình đạt khả năng tổng quát hóa zero-shot xuất sắc trên tập dữ liệu mới BraTS 2023 GLI với chỉ số **Mean Dice vượt trội 86.68%** và chỉ số khoảng cách biên u **ET-HD95 giảm mạnh từ 21.84mm xuống 12.47mm**.
+
+### 3. Outlier Analysis & Failure Mode Case Studies (Phân tích Ca Ngoại lệ 279 & 307)
+
+Hệ thống tiến hành phân tích chuyên sâu các ca bệnh thách thức tiêu biểu nhằm đánh giá các giới hạn hình thái:
+
+| Subject ID | Đặc điểm hình thái | Thách thức phân đoạn | Giải pháp & Cải tiến thành công |
+| :--- | :--- | :--- | :--- |
+| **`BraTS20_Training_279`** | U độ thấp LGG không chứa u tăng cường ($GT_{\text{ET}} = 0$) | Các mô hình baseline bị nhận diện nhầm đốm False Positive ET $\rightarrow$ bị phạt ranh giới HD95 = 373 mm. | `Exp051` tích hợp lọc thành phần liên thông nhỏ (Connected Component Cleanup) triệt tiêu hoàn toàn 100% các đốm nhiễu ET giả. |
+| **`BraTS20_Training_307`** | Khối u có vùng ET siêu nhỏ (chỉ 32 voxels ~ vài điểm pixel) | Các mô hình 2D baseline bỏ sót hoàn toàn ($ET=0$) do kích thước u quá bé. | `Exp043` và `Exp045` (gán trọng số loss thích ứng) phát hiện chính xác vị trí u nhỏ và hạ HD95-ET xuống còn **19.13 mm**. |
+
+### 4. Training Curves Visualizations
 Dưới đây là các biểu đồ đường cong huấn luyện đối chiếu các chiến lược lấy mẫu (Sampling) và các mốc tiến hóa kiến trúc (Milestones):
 
 <p align="center">
@@ -178,7 +198,7 @@ Dưới đây là các biểu đồ đường cong huấn luyện đối chiếu
   <img src="outputs/figures/milestones_training_curves.png" width="48%" alt="Milestones Training Curves" />
 </p>
 
-### 3. Dynamic 3D Segmentation Visualizations (Demos)
+### 5. Dynamic 3D Segmentation Visualizations (Demos)
 Hình ảnh trực quan hóa kết quả phân đoạn lát cắt động 3D của mô hình **Hybrid Mamba U-Net** (Lá cây: WT - Toàn bộ vùng u, Đỏ: TC - Lõi u, Xanh dương: ET - U tăng cường):
 
 <p align="center">
