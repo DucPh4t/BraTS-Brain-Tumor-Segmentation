@@ -274,6 +274,13 @@ These numbers should be interpreted with the exact preprocessing, checkpoint, th
   <img src="outputs/figures/milestones_training_curves.png" width="48%" alt="Milestone training curves" />
 </p>
 
+Example 155-slice prediction demos:
+
+<p align="center">
+  <img src="outputs/figures/best_cases_gifs/BraTS20_Training_189_155slices.gif" width="48%" alt="3D prediction demo for BraTS20 Training 189" />
+  <img src="outputs/figures/best_cases_gifs/BraTS20_Training_347_155slices.gif" width="48%" alt="3D prediction demo for BraTS20 Training 347" />
+</p>
+
 ## Known Failure Cases
 
 The project explicitly keeps difficult cases in the analysis instead of hiding them from the report. One important limitation is very small ET detection:
@@ -282,6 +289,10 @@ The project explicitly keeps difficult cases in the analysis instead of hiding t
 | :--- | :--- | :--- |
 | `BraTS20_Training_307` | ET is extremely small, only about 32 voxels in the ground truth. | Several models preserve WT/TC reasonably well but miss ET, producing ET Dice `0.0`. This is a documented tiny-lesion failure mode. |
 | `BraTS20_Training_279` | Ground truth contains no ET. | Small false-positive ET regions can produce very large ET-HD95, so connected-component cleanup and thresholding must be reported carefully. |
+
+<p align="center">
+  <img src="outputs/figures/exp018/bad_cases/BraTS20_Training_307/overlay.png" width="90%" alt="Failure case BraTS20 Training 307: tiny ET missed by prediction" />
+</p>
 
 ## Usage
 
