@@ -153,7 +153,7 @@ $$
 \mathcal{L}_{\text{total}} = w_{\text{dice}} \mathcal{L}_{\text{Dice}} + w_{\text{bce}} \mathcal{L}_{\text{BCE}} + w_{\text{hier}} \mathcal{L}_{\text{hier}}
 $$
 
-*Trong đó các trọng số được cấu hình: $w_{dice} = 0.5$, $w_{bce} = 0.5$, và $w_{hier} = 0.1$.*
+*Trong đó các trọng số được cấu hình: `w_dice = 0.5`, `w_bce = 0.5`, và `w_hier = 0.1`.*
 
 ---
 
