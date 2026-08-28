@@ -73,21 +73,23 @@ $$
 
 ```mermaid
 flowchart TD
-    A["Baseline 2D U-Net<br/>(Exp001 - Exp008)"] --> B["Attention U-Net & Sampling<br/>(Exp009 - Exp018)"]
-    B --> C["ResNet34 Backbone & Deep Supervision<br/>(Exp019 - Exp022)"]
-    C --> D["Disentangled Modality Fusion 2D/2.5D<br/>(Exp023 - Exp042)"]
-    D --> E["Hybrid 2.5D Mamba Region-Heads U-Net<br/>(Exp043 - Exp051)"]
-    E --> F["Region-Hierarchy Loss & Final Protocol<br/>(Exp052 - Exp053)"]
+    P1["Phase 1: Baselines & Sampling<br/>(Exp001 – Exp008)"] --> P2["Phase 2: Loss, Optimization & Attention<br/>(Exp009 – Exp018)"]
+    P2 --> P3["Phase 3: Multi-Modal Stems & Disentangled Fusion<br/>(Exp019 – Exp034)"]
+    P3 --> P4["Phase 4: Region-Specific Decoding & Hierarchy Loss<br/>(Exp035 – Exp041)"]
+    P4 --> P5["Phase 5: ResNet34 Trunk & Boundary Loss Calibration<br/>(Exp042 – Exp051)"]
+    P5 --> P6["Phase 6: State Space Models (2.5D Mamba Adapters)<br/>(Exp052 – Exp053)"]
+    P6 --> P7["Phase 7: External Validation on BraTS 2023 GLI<br/>(1,251 Zero-Shot Cases)"]
 ```
 
-| Phase / Group | Experiments | Core Novelty & Focus |
-| :--- | :--- | :--- |
-| **Phase 1: Baselines & Sampling** | `exp001` – `exp008` | U-Net 2D tiêu chuẩn, chuẩn hóa dữ liệu, các chiến lược lấy mẫu lát cắt (fixed, weighted, oversampled). |
-| **Phase 2: Attention & Optimization** | `exp009` – `exp018` | Attention Gates, bộ điều phối tốc độ học (Cosine, Plateau), tăng cường dữ liệu. |
-| **Phase 3: Deep Backbones** | `exp019` – `exp022` | Tích hợp bộ mã hóa pretrained ResNet34, cơ chế giám sát sâu (deep supervision) đa tỷ lệ. |
-| **Phase 4: Disentangled Fusion** | `exp023` – `exp042` | Nhánh mã hóa riêng biệt cho từng phương thái xung, attention liên phương thái, dữ liệu đa lát cắt 2.5D. |
-| **Phase 5: State Space Models (Mamba)** | `exp043` – `exp051` | Khối nghẽn (bottleneck) Hybrid 2.5D Mamba, cổng phân đoạn u động, truyền đặc trưng phân giải cao. |
-| **Phase 6: Region-Hierarchy Consistency** | `exp052` – `exp053` | Các nhánh dự đoán u độc lập, hàm mất mát phân cấp cấu trúc giải phẫu khối u $\mathcal{L}_{hier}$. |
+| Phase / Group | Experiments | Core Novelty & Focus | Key Findings & Top Models |
+| :--- | :--- | :--- | :--- |
+| **Phase 1: Baselines & Sampling** | `exp001` – `exp008` | U-Net 2D tiêu chuẩn, chuẩn hóa dữ liệu Z-Score Clip, các chiến lược lấy mẫu lát cắt (fixed, weighted, oversampled). | `exp004` (Z-Score Clip: Mean 84.17%), `exp005` (Data Augmentation: Mean 83.34%). |
+| **Phase 2: Loss, Optimization & Attention** | `exp009` – `exp018` | Hàm loss Dice+BCE, bộ tối ưu AdamW, cơ chế Attention Gates. | `exp011` (Dice+BCE: Mean 84.08%), `exp018` (Attention U-Net: Mean 84.07%, HD95-ET 14.29mm). |
+| **Phase 3: Multi-Modal Stems & Disentangled Fusion** | `exp019` – `exp034` | Nhánh mã hóa riêng biệt cho từng xung MRI (FLAIR, T1, T1ce, T2), kết hợp shared/private (DFuse-Net style), TTA inference. | `exp021` (Disentangled Fusion: Mean 84.94%), `exp023` (Exp021 + TTA: Mean 85.15%). |
+| **Phase 4: Region-Specific Decoding & Hierarchy Loss** | `exp035` – `exp041` | Tách biệt các nhánh decoder WT/TC/ET độc lập và áp dụng hàm mất mát phân cấp giải phẫu $\mathcal{L}_{\text{hier}}$. | `exp036` (Region Heads + Hierarchy: Mean 85.25%, HD95-ET 13.79mm - Đột phá lý thuyết). |
+| **Phase 5: ResNet34 Trunk & Loss Calibration** | `exp042` – `exp051` | Tích hợp bộ mã hóa pretrained ResNet34, gán trọng số loss thích ứng (Weighted BCE), lọc nhiễu liên thông (CC Cleanup). | 🥇 `exp043` (ResNet34 + Hierarchy: **Mean 85.51%** - Best Baseline), 🎯 `exp045` (Best HD95: 7.42mm). |
+| **Phase 6: State Space Models (Mamba)** | `exp052` – `exp053` | Bộ thích ứng 2.5D Mamba Selective State Space tại bottleneck, cổng độ tin cậy đa xung (Cross-Modality Reliability Gate). | 🐍 `exp052` (2.5D Mamba 30x30: Mean 84.32%), `exp053` (60x60 Mamba + Reliability Gate: TC 86.39%). |
+| **Phase 7: External Cross-Validation** | BraTS 2023 GLI | Kiểm thử trực tiếp Zero-shot trên toàn bộ 1,251 ca bệnh ngoại lai BraTS 2023 GLI. | 🚀 `Exp043-2023` (**Mean Dice 86.68%**, **Mean HD95 10.54mm** - Khả năng tổng quát hóa xuất sắc). |
 
 ---
 
