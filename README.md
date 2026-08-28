@@ -1,11 +1,11 @@
-# 🧠 Multi-Modal Brain Tumor Segmentation on BraTS 2020 & 2023
-> **A Comprehensive 53-Experiment Investigation: From 2D Baseline U-Nets to Disentangled Multi-Modal Fusion and Hybrid 2.5D Mamba U-Nets with Region-Hierarchy Consistency**
+# 🧠 Multi-Modal Brain Tumor Segmentation on BraTS 2020 with External Validation on BraTS 2023
+> **A Comprehensive 53-Experiment Investigation: Trained on BraTS 2020 & Evaluated for External Generalization on BraTS 2023 GLI**
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.10%2B-blue.svg" alt="Python 3.10+">
   <img src="https://img.shields.io/badge/PyTorch-2.0%2B-ee4c2c.svg" alt="PyTorch 2.0+">
   <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
-  <img src="https://img.shields.io/badge/Dataset-BraTS%202020%20%7C%202023-green.svg" alt="BraTS Dataset">
+  <img src="https://img.shields.io/badge/Dataset-BraTS%202020%20(Train)%20%7C%202023%20(Test)-green.svg" alt="BraTS Dataset">
   <img src="https://img.shields.io/badge/SSM_Backbone-Mamba-purple.svg" alt="Mamba">
 </p>
 

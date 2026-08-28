@@ -17,8 +17,9 @@ MRI dataset/
 # ==============================================================================
 # Model Weights, Checkpoints & Outputs
 # ==============================================================================
-outputs/
+outputs/*
 !outputs/figures/
+!outputs/figures/**
 logs/
 tmp/
 *.pth
