@@ -41,12 +41,10 @@ Kết quả thực nghiệm đạt chỉ số **Mean Dice vượt trội 87.1%**
 
 ## 🌟 Key Highlights
 - **53 Modular Configurations (`configs/exp001.yaml` → `exp053.yaml`)**: Hoàn toàn kiểm soát và tái lập kết quả qua các file cấu hình YAML được thiết kế tường minh, không chứa các bình luận rác.
-- **Novel Architectures**:
-  - Standard & Attention U-Nets (2D baseline).
-  - ResNet34 Encoder U-Net với cơ chế giám sát sâu đa tỷ lệ (Multi-Scale Deep Supervision).
-  - Disentangled Multi-Modal Feature Fusion U-Net (phân tách dòng thông tin đặc thù của T1, T1ce, T2, FLAIR).
-  - **Hybrid 2.5D Mamba U-Net**: Kết hợp ngữ cảnh không gian đa lát cắt với mô hình hóa chuỗi Mamba trạng thái chọn lọc hai chiều.
-- **Biologically-Informed Region-Hierarchy Consistency**: Hàm loss phân cấp dựa trên xác suất cấp voxel nhằm triệt tiêu các dự đoán vi phạm cấu trúc hình thái giải phẫu của khối u.
+- **Two Core Benchmark Models (Hai Mô Hình Trọng Tâm)**:
+  - 🥇 **ResNet34 Region-Heads U-Net (`Exp043`)**: Mô hình đạt **hiệu năng thực nghiệm đỉnh cao nhất** (Mean Dice **85.51%** trên BraTS 2020 và **86.68%** trên 1,251 ca BraTS 2023 GLI).
+  - 🐍 **Hybrid 2.5D Mamba U-Net (`Exp052/Exp053`)**: Mô hình **tiên phong về mặt kiến trúc & đổi mới sáng tạo**, tích hợp bộ thích ứng Mamba 2.5D Selective State Space tại bottleneck để khai thác ngữ cảnh 3D mà không gây quá tải bộ nhớ.
+- **Biologically-Informed Region-Hierarchy Consistency**: Hàm loss phân cấp dựa trên xác suất cấp voxel ($\mathcal{L}_{\text{hier}}$) nhằm triệt tiêu các dự đoán vi phạm cấu trúc hình thái giải phẫu của khối u ($P_{\text{ET}} \le P_{\text{TC}} \le P_{\text{WT}}$).
 - **Cross-Dataset Generalization**: Kiểm chứng chéo và đánh giá tính tổng quát hóa trực tiếp trên tập dữ liệu ngoại lai BraTS 2023 GLI.
 
 ---
