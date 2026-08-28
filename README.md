@@ -277,8 +277,13 @@ These numbers should be interpreted with the exact preprocessing, checkpoint, th
 Example 155-slice prediction demos:
 
 <p align="center">
-  <img src="outputs/figures/best_cases_gifs/BraTS20_Training_189_155slices.gif" width="48%" alt="3D prediction demo for BraTS20 Training 189" />
-  <img src="outputs/figures/best_cases_gifs/BraTS20_Training_347_155slices.gif" width="48%" alt="3D prediction demo for BraTS20 Training 347" />
+  <strong>BraTS20_Training_189</strong><br>
+  <img src="outputs/figures/best_cases_gifs/BraTS20_Training_189_155slices.gif" width="90%" alt="3D prediction demo for BraTS20 Training 189" />
+</p>
+
+<p align="center">
+  <strong>BraTS20_Training_347</strong><br>
+  <img src="outputs/figures/best_cases_gifs/BraTS20_Training_347_155slices.gif" width="90%" alt="3D prediction demo for BraTS20 Training 347" />
 </p>
 
 ## Known Failure Cases
