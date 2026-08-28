@@ -193,24 +193,52 @@ Hệ thống cung cấp danh mục các công cụ xử lý và kiểm thử t�
 
 ## ⚙️ Hardware Requirements & Setup
 
-### 1. Yêu cầu Phần cứng (Hardware Benchmark)
+### 1. Yêu cầu Phần cứng & Tương thích OS (Hardware Benchmark)
 - **VRAM tối thiểu**: ~6 GB (cho các mô hình 2D U-Net baseline) và ~12 GB (cho các mô hình 2.5D Mamba U-Net).
-- **Hỗ trợ Nền tảng**:
-  - **NVIDIA GPU**: CUDA 11.8+ / 12.0+ (Khuyên dùng cho Mamba-SSM).
-  - **Apple Silicon Mac**: Tăng tốc GPU qua PyTorch MPS (Metal Performance Shaders) hỗ trợ mượt mà các mô hình 2D/2.5D CNN.
+- **Hỗ trợ Hệ điều hành & Tăng tốc Phần cứng**:
+  - 🪟 **Windows (NVIDIA GPU)**: Tăng tốc qua CUDA 11.8+ / 12.0+, hỗ trợ trọn vẹn cả CNN và Mamba-SSM CUDA kernels.
+  - 🍏 **macOS (Apple Silicon M1/M2/M3/M4)**: Tăng tốc GPU qua PyTorch MPS (Metal Performance Shaders) hỗ trợ mượt mà các mô hình 2D/2.5D CNN.
 
-### 2. Khởi tạo môi trường ảo
+---
+
+### 2. Khởi tạo Môi trường Ảo (Setup Guide for Windows & macOS/Linux)
+
+#### 🍏 Trên macOS / Linux:
 ```bash
+# 1. Clone repository
 git clone https://github.com/DucPh4t/BraTS-Brain-Tumor-Segmentation.git
 cd BraTS-Brain-Tumor-Segmentation
+
+# 2. Khởi tạo và kích hoạt môi trường ảo
 python3 -m venv venv
 source venv/bin/activate
+
+# 3. Cài đặt các thư viện phụ thuộc
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### 3. Cài đặt Mamba-SSM (Chỉ dành cho GPU CUDA)
-Dành cho các thí nghiệm từ `exp043` trở đi có sử dụng kiến trúc Mamba bottleneck:
+#### 🪟 Trên Windows (Command Prompt / PowerShell):
+```cmd
+:: 1. Clone repository
+git clone https://github.com/DucPh4t/BraTS-Brain-Tumor-Segmentation.git
+cd BraTS-Brain-Tumor-Segmentation
+
+:: 2. Khởi tạo môi trường ảo
+python -m venv venv
+
+:: 3. Kích hoạt môi trường ảo (PowerShell: .\venv\Scripts\Activate.ps1 | CMD: venv\Scripts\activate.bat)
+venv\Scripts\activate
+
+:: 4. Cài đặt các thư viện phụ thuộc
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+---
+
+### 3. Cài đặt Mamba-SSM (Chỉ dành cho GPU NVIDIA trên Windows / Linux / Kaggle / Colab)
+Dành cho các thí nghiệm từ `exp043` trở đi có sử dụng kiến trúc Mamba bottleneck (Yêu cầu CUDA toolkit):
 ```bash
 pip install -r requirements-mamba.txt --no-build-isolation
 ```
