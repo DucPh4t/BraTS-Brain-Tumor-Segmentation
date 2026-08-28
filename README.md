@@ -161,17 +161,17 @@ $$
 
 ### 1. Quantitative Evaluation on BraTS 2020 (3D Validation)
 
-| Model Architecture | WT Dice | TC Dice | ET Dice | Mean Dice |
-| :--- | :---: | :---: | :---: | :---: |
-| **Baseline 2D U-Net** (`exp001`) | 0.865 | 0.772 | 0.724 | 0.787 |
-| **Attention U-Net** (`exp018`) | 0.884 | 0.801 | 0.761 | 0.815 |
-| **ResNet34 U-Net** (`exp022`) | 0.897 | 0.825 | 0.783 | 0.835 |
-| **Disentangled 2.5D Fusion** (`exp036`) | 0.908 | 0.842 | 0.802 | 0.851 |
-| **Hybrid 2.5D Mamba U-Net** (`exp043`) | 0.916 | 0.858 | 0.821 | **0.865** |
-| **Hierarchy-Consistent Mamba** (`exp052`) | **0.919** | **0.864** | **0.829** | **0.871** |
+| Model Architecture | Config | WT Dice | TC Dice | ET Dice | Mean Dice |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Baseline 2D U-Net** | `exp001` | 0.8650 | 0.7720 | 0.7240 | 0.7870 |
+| **Attention U-Net 2D** | `exp018` | 0.8926 | 0.8418 | 0.7698 | 0.8347 |
+| **Disentangled 2D Fusion** | `exp021` | 0.9015 | 0.8502 | 0.7810 | 0.8442 |
+| **Region Heads + Hierarchy Consistency** | `exp036` | 0.9072 | 0.8590 | 0.7915 | 0.8526 |
+| **ResNet34 Region-Heads U-Net** (Best Baseline) | `exp043` | **0.9081** | **0.8642** | **0.7929** | **0.8551** |
+| **Hybrid 2.5D Mamba Residual Adapter** | `exp052` | 0.9017 | 0.8514 | 0.7766 | 0.8432 |
 
 ### 2. External Generalization on BraTS 2023 GLI (Zero-shot Evaluation - 1,251 Cases)
-Đánh giá mô hình **Hybrid 2.5D Mamba U-Net (`Exp043`)** (chỉ huấn luyện trên BraTS 2020) trực tiếp trên toàn bộ 1,251 ca bệnh của tập dữ liệu ngoại lai **BraTS 2023 GLI** mà không fine-tune:
+Đánh giá mô hình mạnh nhất **ResNet34 Region-Heads U-Net (`Exp043`)** (chỉ huấn luyện trên BraTS 2020) trực tiếp trên toàn bộ 1,251 ca bệnh của tập dữ liệu ngoại lai **BraTS 2023 GLI** mà không fine-tune:
 
 | Dataset / Benchmark | WT Dice | TC Dice | ET Dice | Mean Dice | WT HD95 | TC HD95 | ET HD95 | Mean HD95 |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
