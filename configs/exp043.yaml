@@ -1,0 +1,41 @@
+# ============================================================
+# Exp043 — Backbone ResNet34 + Nhánh dự đoán vùng u + Ràng buộc phân cấp
+# Mô hình nền tảng: ResNet34 U-Net ở Exp042
+# Thay đổi: Nhánh WT/TC/ET độc lập và hàm mất mát phân cấp
+# Mục tiêu: Tích hợp cơ chế cải tiến từ Exp036 lên backbone ResNet34
+# ============================================================
+
+exp_name: "exp043"
+description: "Nhóm Q Exp043 — ResNet34 backbone + region heads + hierarchy consistency"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "ResNet34RegionHeadsUNet2D"
+  architecture: "resnet34_region_heads_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+  encoder_weights: "imagenet"
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+    hierarchy_weight: 0.1
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

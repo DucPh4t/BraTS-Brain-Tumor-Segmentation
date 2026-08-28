@@ -1,0 +1,36 @@
+# ============================================================
+# Exp008 — Nhóm D: Slice Sampling Strategy
+# Mô hình nền tảng: Exp002
+# Thay đổi: Lấy mẫu lát cắt chứa u có oversampling x2
+# Mục tiêu: Xử lý mất cân bằng lớp ở mức lát cắt
+# ============================================================
+
+exp_name: "exp008"
+description: "Nhóm D Exp008 — Oversample Tumor Slices x2"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "oversample"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "UNet2D"
+  in_channels: 4
+  out_channels: 3
+  init_features: 32
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice"
+  optimizer: "adam"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

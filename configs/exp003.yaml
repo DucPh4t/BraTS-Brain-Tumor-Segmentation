@@ -1,0 +1,36 @@
+# ============================================================
+# Exp003 — Stratified split, Min-Max, No aug, Adam, Dice (độc lập)
+# Mô hình nền tảng: Exp002
+# Thay đổi: Đo lường độ lệch chuẩn và độ tin cậy của mô hình
+# Mục tiêu: Thiết lập baseline tin cậy cho các thử nghiệm tiếp theo
+# ============================================================
+
+exp_name: "exp003"
+description: "Nhóm B Exp003 — Z-score thuần không clip (A2), so sánh với Exp004 zscore_clip"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_raw"
+  augmentation: false
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "UNet2D"
+  in_channels: 4
+  out_channels: 3
+  init_features: 32
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice"
+  optimizer: "adam"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

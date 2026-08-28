@@ -1,0 +1,204 @@
+"""
+Mô tả: Chạy dự đoán và xuất bố cục so sánh trực quan cho các ca kiểm thử khó phân đoạn nhất (như Training 279, 307, 326, 273, 236).
+Đầu vào:
+    Đọc tự động dữ liệu các ca bệnh tương ứng từ BraTS dataset. Checkpoint mô hình được chỉ định cục bộ.
+Đầu ra:
+    Lưu các ảnh PNG thể hiện mặt nạ dự đoán phủ lên ảnh gốc đối chiếu với Ground Truth.
+"""
+
+import os
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+
+import numpy as np
+import nibabel as nib
+import torch
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+
+from src.models.multimodal_unet import DisentangledFusionUNet2D, DisentangledFusionRegionHeadsUNet2D
+from src.models.resnet_unet import ResNet34RegionHeadsUNet2D
+from src.data.processors import get_preprocessor
+
+# ─── Colors ───────────────────────────────────────────────────────
+WT_COLOR = np.array([0.2, 0.8, 0.2, 0.45])  # Green
+TC_COLOR = np.array([0.9, 0.2, 0.2, 0.55])  # Red
+ET_COLOR = np.array([1.0, 0.9, 0.0, 0.65])  # Yellow
+
+HARD_CASES = [
+    "BraTS20_Training_279",
+    "BraTS20_Training_307",
+    "BraTS20_Training_326",
+    "BraTS20_Training_273",
+    "BraTS20_Training_236"
+]
+
+def calc_dice_2d(pred, gt):
+    smooth = 1e-5
+    intersection = (pred * gt).sum()
+    return (2. * intersection + smooth) / (pred.sum() + gt.sum() + smooth)
+
+def load_subject(data_dir, sid, preprocessor):
+    subdir = os.path.join(data_dir, sid)
+    vols = {}
+    for mod in ["flair", "t1", "t1ce", "t2"]:
+        path = os.path.join(subdir, f"{sid}_{mod}.nii")
+        vols[mod] = preprocessor(nib.load(path).get_fdata())
+    
+    seg_path = os.path.join(subdir, f"{sid}_seg.nii")
+    if not os.path.exists(seg_path):
+        for f in os.listdir(subdir):
+            if "seg" in f.lower() and f.endswith(".nii"):
+                seg_path = os.path.join(subdir, f)
+                break
+    vols["seg"] = nib.load(seg_path).get_fdata().astype(np.uint8)
+    return vols
+
+def run_inference_3d(model, vols, device, batch_size=16):
+    stack_4d = np.stack([vols["flair"], vols["t1"], vols["t1ce"], vols["t2"]], axis=0)
+    stack_4d = np.transpose(stack_4d, (3, 0, 1, 2))  # (155, 4, 240, 240)
+    
+    all_preds = []
+    model.eval()
+    with torch.no_grad():
+        for i in range(0, 155, batch_size):
+            batch = torch.from_numpy(stack_4d[i:i+batch_size].astype(np.float32)).to(device)
+            out = model(batch)
+            if isinstance(out, tuple): out = out[0]
+            probs = torch.sigmoid(out)
+            pred = (probs > 0.5).cpu().numpy().astype(np.uint8)
+            all_preds.append(pred)
+            
+    return np.concatenate(all_preds, axis=0)
+
+def build_overlay(img_slice, wt_mask, tc_mask, et_mask):
+    vmin, vmax = img_slice.min(), img_slice.max()
+    img_norm = (img_slice - vmin) / (vmax - vmin) if vmax > vmin else np.zeros_like(img_slice)
+    canvas = np.stack([img_norm, img_norm, img_norm, np.ones_like(img_norm)], axis=-1)
+    
+    for mask, color in [(wt_mask, WT_COLOR), (tc_mask, TC_COLOR), (et_mask, ET_COLOR)]:
+        loc = mask > 0
+        for c in range(3):
+            canvas[loc, c] = canvas[loc, c] * (1 - color[3]) + color[c] * color[3]
+    return canvas
+
+def get_slice_frame(s_idx, vols, preds_dict, sid):
+    fig, axes = plt.subplots(2, 3, figsize=(18, 12))
+    fig.patch.set_facecolor("#0d1117")
+    
+    f_s = vols["flair"][:, :, s_idx]
+    seg_s = vols["seg"][:, :, s_idx]
+    
+    wt_g = (seg_s > 0).astype(np.float32)
+    tc_g = np.logical_or(seg_s==1, seg_s==4).astype(np.float32)
+    et_g = (seg_s==4).astype(np.float32)
+    
+    gt_o = build_overlay(f_s, wt_g, tc_g, et_g)
+    
+    panels = [
+        (f_s, "FLAIR", None, True),
+        (gt_o, "Ground Truth", None, False),
+        ("exp021", "Exp021 (Base)", preds_dict["exp021"], False),
+        ("exp036", "Exp036 (Heads)", preds_dict["exp036"], False),
+        ("exp043", "Exp043 (ResNet)", preds_dict["exp043"], False),
+        ("exp045", "Exp045 (ET Loss)", preds_dict["exp045"], False)
+    ]
+    
+    for i in range(6):
+        ax = axes[i//3, i%3]
+        ax.set_facecolor("#0d1117")
+        ax.axis("off")
+        
+        panel_data = panels[i]
+        
+        if i < 2:
+            img = panel_data[0]
+            if panel_data[3]: # grayscale
+                ax.imshow(img.T, cmap="gray", origin="lower")
+            else:
+                ax.imshow(img.transpose(1, 0, 2), origin="lower")
+            ax.set_title(panel_data[1], color="white", fontsize=18, fontweight="bold")
+        else:
+            p_vol = panel_data[2]
+            wt_p, tc_p, et_p = p_vol[s_idx, 0].astype(np.float32), p_vol[s_idx, 1].astype(np.float32), p_vol[s_idx, 2].astype(np.float32)
+            
+            d_wt = calc_dice_2d(wt_p, wt_g) * 100
+            d_tc = calc_dice_2d(tc_p, tc_g) * 100
+            d_et = calc_dice_2d(et_p, et_g) * 100
+            d_mean = (d_wt + d_tc + d_et) / 3.0
+            
+            pr_o = build_overlay(f_s, wt_p, tc_p, et_p)
+            ax.imshow(pr_o.transpose(1, 0, 2), origin="lower")
+            
+            title = f"{panel_data[1]}\nMean: {d_mean:.1f}% (WT:{d_wt:.0f} TC:{d_tc:.0f} ET:{d_et:.0f})"
+            ax.set_title(title, color="white", fontsize=16, fontweight="bold")
+            
+    # Legend
+    handles = [
+        mpatches.Patch(color=WT_COLOR[:3], label='WT (Whole Tumor)'),
+        mpatches.Patch(color=TC_COLOR[:3], label='TC (Tumor Core)'),
+        mpatches.Patch(color=ET_COLOR[:3], label='ET (Enhancing Tumor)')
+    ]
+    fig.legend(handles=handles, loc='lower center', ncol=3, fontsize=14, framealpha=0.2, labelcolor='white')
+    
+    plt.suptitle(f"Subject: {sid} | Slice: {s_idx:03d}/155", color="white", y=0.98, fontsize=22, fontweight="bold")
+    plt.tight_layout(rect=[0, 0.05, 1, 0.95])
+    
+    fig.canvas.draw()
+    image = np.asarray(fig.canvas.buffer_rgba())[..., :3]
+    plt.close(fig)
+    return image
+
+def main():
+    import imageio
+    from tqdm import tqdm
+    
+    data_dir = "/Users/nguyenducphat/Projects/ĐATN MRI/MRI dataset/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData"
+    out_dir = "outputs/figures/hardest_5_cases"
+    os.makedirs(out_dir, exist_ok=True)
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+    
+    print("Loading models...")
+    models = {
+        "exp021": DisentangledFusionUNet2D(n_channels=4, n_classes=3, init_features=64).to(device),
+        "exp036": DisentangledFusionRegionHeadsUNet2D(n_channels=4, n_classes=3, init_features=64).to(device),
+        "exp043": ResNet34RegionHeadsUNet2D(n_channels=4, n_classes=3, init_features=64, encoder_weights=None).to(device),
+        "exp045": ResNet34RegionHeadsUNet2D(n_channels=4, n_classes=3, init_features=64, encoder_weights=None).to(device)
+    }
+    
+    try:
+        models["exp021"].load_state_dict(torch.load("outputs/exp021/best_model.pth", map_location=device, weights_only=True))
+        models["exp036"].load_state_dict(torch.load("outputs/exp036/best_model.pth", map_location=device, weights_only=True))
+        models["exp043"].load_state_dict(torch.load("outputs/exp043/best_model.pth", map_location=device, weights_only=True))
+        models["exp045"].load_state_dict(torch.load("outputs/exp045/best_model.pth", map_location=device, weights_only=True))
+    except Exception as e:
+        print(f"Error loading checkpoints: {e}")
+        return
+
+    preprocessor = get_preprocessor("zscore_clip")
+    
+    for sid in HARD_CASES:
+        print(f"\\nProcessing {sid}...")
+        vols = load_subject(data_dir, sid, preprocessor)
+        
+        preds = {}
+        for exp_id, model in models.items():
+            print(f"  Inferring {exp_id}...")
+            preds[exp_id] = run_inference_3d(model, vols, device)
+            
+        frames = []
+        for s_idx in tqdm(range(155), desc=f"Generating frames for {sid}"):
+            frame = get_slice_frame(s_idx, vols, preds, sid)
+            frames.append(frame)
+            
+        gif_path = os.path.join(out_dir, f"{sid}_all_slices.gif")
+        print(f"Saving GIF to {gif_path}...")
+        imageio.mimsave(gif_path, frames, fps=10, loop=0)
+
+if __name__ == "__main__":
+    main()

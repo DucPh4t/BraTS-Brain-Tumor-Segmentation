@@ -1,0 +1,43 @@
+# ============================================================
+# Exp033 — Chuẩn hóa CLAHE trên T1ce
+# Mô hình nền tảng: Exp004
+# Thay đổi: zscore_clip -> zscore_clip + CLAHE chỉ trên xung T1ce
+# Mục tiêu: Tăng cường tương phản cục bộ để làm nổi bật vùng ET
+# ============================================================
+
+exp_name: "exp033"
+description: "Nhóm B2 Exp033 — Z-score clip + CLAHE T1ce-only screening with UNet32"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip_clahe"
+  clahe:
+    modalities: ["t1ce"]
+    clip_percentiles: [0.5, 99.5]
+    clip_limit: 0.01
+    kernel_size: 32
+    nbins: 256
+    min_brain_pixels: 100
+  augmentation: false
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "UNet2D"
+  in_channels: 4
+  out_channels: 3
+  init_features: 32
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice"
+  optimizer: "adam"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

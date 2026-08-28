@@ -1,0 +1,41 @@
+# ============================================================
+# Exp044 — Exp043 + Lấy mẫu lát cắt chứa u có trọng số 3:1
+# Mô hình nền tảng: Exp043 ResNet34 + Nhánh vùng u + Ràng buộc phân cấp
+# Thay đổi: Bộ lấy mẫu huấn luyện sử dụng các lát cắt chứa u với trọng số 3 và lát không chứa u trọng số 1
+# Mục tiêu: Tập trung huấn luyện trên các lát cắt chứa u khối u
+# ============================================================
+
+exp_name: "exp044"
+description: "Nhóm R Exp044 — Exp043 + weighted tumor-slice sampling 3:1"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "weighted"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "ResNet34RegionHeadsUNet2D"
+  architecture: "resnet34_region_heads_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+  encoder_weights: "imagenet"
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+    hierarchy_weight: 0.1
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

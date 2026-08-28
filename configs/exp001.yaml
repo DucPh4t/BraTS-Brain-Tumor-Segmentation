@@ -1,0 +1,36 @@
+# ============================================================
+# Exp001 — Baseline: Sequential split, Min-Max norm, No aug, Adam, Dice loss
+# Mô hình nền tảng: Không (Mô hình nền tảng đầu tiên)
+# Thay đổi: Không
+# Mục tiêu: Thiết lập baseline ban đầu
+# ============================================================
+
+exp_name: "exp001"
+description: "Nhóm A Exp001 — Baseline: Sequential split, Min-Max norm, No aug, Adam, Dice loss"
+
+data:
+  root_dir: "/kaggle/input/brats2020/MICCAI_BraTS2020_TrainingData"
+  split_type: "sequential"
+  slice_range: [0, 155]
+  normalization: "min_max"
+  augmentation: false
+  sampling: "fixed"
+  context_slices: 0
+  min_tumor_pixels: 100
+  cache_volumes: true
+
+model:
+  name: "UNet2D"
+  in_channels: 4
+  out_channels: 3
+  init_features: 32
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice"
+  optimizer: "adam"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

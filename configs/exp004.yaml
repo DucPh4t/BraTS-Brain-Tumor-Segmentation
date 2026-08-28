@@ -1,0 +1,36 @@
+# ============================================================
+# Exp004 — Brain-masked Z-score + Percentile Clip(0.5,99.5), chuẩn A4
+# Mô hình nền tảng: Exp002
+# Thay đổi: Chuẩn hóa Z-score trên vùng não kết hợp cắt ngưỡng phân vị
+# Mục tiêu: Cải thiện phân phối độ tương phản
+# ============================================================
+
+exp_name: "exp004"
+description: "Nhóm B Exp004 — Brain-masked Z-score + Percentile Clip(0.5,99.5), chuẩn A4"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: false
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "UNet2D"
+  in_channels: 4
+  out_channels: 3
+  init_features: 32
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice"
+  optimizer: "adam"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

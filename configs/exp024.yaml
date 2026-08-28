@@ -1,0 +1,62 @@
+# ============================================================
+# Exp024 — Giai đoạn I: Tinh chỉnh ngưỡng trên tập Validation
+# Mô hình nền tảng: Checkpoint của Exp021, không huấn luyện lại
+# Thay đổi: Tinh chỉnh các ngưỡng WT/TC/ET trên tập validation
+# Mục tiêu: Cân bằng độ chính xác trên tập kiểm thử
+# ============================================================
+
+exp_name: "exp024"
+description: "Nhóm I Exp024 — Exp021 frozen checkpoint + validation threshold tuning"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: false
+  sampling: "fixed"
+  cache_volumes: false
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "DisentangledFusionUNet2D"
+  architecture: "disentangled_fusion_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+  return_features: false
+
+training:
+  epochs: 0
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"
+
+evaluation:
+  source_exp: "exp021"
+  checkpoint_path: "outputs/exp021/best_model.pth"
+  split: "test"
+  batch_size: 16
+  thresholds:
+    WT: 0.5
+    TC: 0.5
+    ET: 0.5
+  tta:
+    enabled: false
+  threshold_tuning:
+    enabled: true
+    split: "val"
+    grids:
+      WT: [0.45, 0.50, 0.55]
+      TC: [0.40, 0.45, 0.50, 0.55]
+      ET: [0.30, 0.35, 0.40, 0.45, 0.50]
+  postprocess:
+    enabled: false
+    enforce_hierarchy: true

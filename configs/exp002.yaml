@@ -1,0 +1,36 @@
+# ============================================================
+# Exp002 — Stratified HGG/LGG split, so sánh với Exp001 sequential
+# Mô hình nền tảng: Exp001
+# Thay đổi: Phân chia stratified k-fold theo nhóm HGG/LGG thay vì tuần tự
+# Mục tiêu: Đánh giá tính ổn định khi phân chia dữ liệu
+# ============================================================
+
+exp_name: "exp002"
+description: "Nhóm A Exp002 — Stratified HGG/LGG split, so sánh với Exp001 sequential"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "min_max"
+  augmentation: false
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "UNet2D"
+  in_channels: 4
+  out_channels: 3
+  init_features: 32
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice"
+  optimizer: "adam"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

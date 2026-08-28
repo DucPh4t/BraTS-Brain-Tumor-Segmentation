@@ -1,0 +1,44 @@
+# ============================================================
+# Exp049 — Dice + Focal Tversky trên backbone ResNet34 region heads
+# Mô hình nền tảng: Exp043 ResNet34 + Nhánh vùng u + Ràng buộc phân cấp
+# Thay đổi: Thay thế Dice+BCE bằng Dice+Focal Tversky
+# Mục tiêu: Đánh giá hàm mất mát Focal Tversky trên backbone mạnh
+# ============================================================
+
+exp_name: "exp049"
+description: "Nhóm U Exp049 — Exp043 backbone + Dice-FocalTversky loss"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "ResNet34RegionHeadsUNet2D"
+  architecture: "resnet34_region_heads_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+  encoder_weights: "imagenet"
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_focal"
+  loss_params:
+    dice_weight: 0.5
+    alpha: 0.7
+    beta: 0.3
+    gamma: 1.3333
+    hierarchy_weight: 0.1
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

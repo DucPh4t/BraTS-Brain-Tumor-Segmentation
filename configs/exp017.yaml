@@ -1,0 +1,39 @@
+# ============================================================
+# Exp017 — Nhóm G: Architecture
+# Mô hình nền tảng: Exp013
+# Thay đổi: Tăng số kênh đặc trưng init_features từ 32 lên 64
+# Mục tiêu: Mở rộng dung lượng mô hình (model capacity)
+# ============================================================
+
+exp_name: "exp017"
+description: "Nhóm G Exp017 — UNet64 (init_features=64)"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "UNet2D"
+  architecture: "unet2d"
+  in_channels: 4
+  out_channels: 3
+  init_features: 64
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

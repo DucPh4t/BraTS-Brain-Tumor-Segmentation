@@ -1,0 +1,43 @@
+# ============================================================
+# Exp039 — Hướng 3: Tinh chỉnh ranh giới (Boundary-aware Refinement)
+# Mô hình nền tảng: Công thức Exp036, huấn luyện từ đầu
+# Thay đổi: Thêm hàm mất mát ranh giới mềm (soft boundary consistency loss) trên các mặt nạ
+# Mục tiêu: Giảm chỉ số khoảng cách ranh giới HD95
+# ============================================================
+
+exp_name: "exp039"
+description: "Nhóm O Exp039 — Exp036 + boundary-aware refinement loss"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "DisentangledFusionRegionHeadsUNet2D"
+  architecture: "disentangled_fusion_region_heads_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+  return_features: false
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+    hierarchy_weight: 0.1
+    boundary_weight: 0.05
+    boundary_kernel_size: 3
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

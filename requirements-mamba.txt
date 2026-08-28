@@ -1,0 +1,3 @@
+# Install after the CUDA-enabled PyTorch bundled by Kaggle.
+# Recommended command: pip install -r requirements-mamba.txt --no-build-isolation
+mamba-ssm==2.3.2.post1

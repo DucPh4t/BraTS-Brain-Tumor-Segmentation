@@ -1,0 +1,56 @@
+# ============================================================
+# Exp028 — Giai đoạn III: Kết hợp shared/private 2.5D thực tế
+# Mô hình nền tảng: Công thức Exp021, huấn luyện lại với các lát cắt lân cận
+# Thay đổi: Mỗi phương thái đóng góp 3 lát cắt trục -> 12 kênh đầu vào
+# Mục tiêu: Bổ sung thông tin ngữ cảnh chiều thứ 3
+# ============================================================
+
+exp_name: "exp028"
+description: "Nhóm K Exp028 — 2.5D Disentangled Fusion with 3-slice context per modality"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 3
+  min_tumor_pixels: 100
+
+model:
+  name: "DisentangledFusionUNet2_5D"
+  architecture: "disentangled_fusion_unet2_5d"
+  in_channels: 12
+  num_classes: 3
+  init_features: 64
+  return_features: false
+
+training:
+  epochs: 30
+  batch_size: 8
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"
+
+evaluation:
+  split: "test"
+  batch_size: 8
+  thresholds:
+    WT: 0.5
+    TC: 0.5
+    ET: 0.5
+  tta:
+    enabled: true
+    flips: ["none", "h", "w", "hw"]
+  postprocess:
+    enabled: false
+    enforce_hierarchy: true
+  et_rescue:
+    enabled: false

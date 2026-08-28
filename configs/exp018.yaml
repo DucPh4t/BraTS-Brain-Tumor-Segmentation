@@ -1,0 +1,39 @@
+# ============================================================
+# Exp018 — Nhóm G: Architecture
+# Mô hình nền tảng: Exp013
+# Thay đổi: Sử dụng kiến trúc Attention U-Net 2D với init_features=64
+# Mục tiêu: Lọc đặc trưng truyền từ encoder sang decoder qua Attention Gate
+# ============================================================
+
+exp_name: "exp018"
+description: "Nhóm G Exp018 — Attention UNet (init_features=64)"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "AttentionUNet2D"
+  architecture: "attention_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

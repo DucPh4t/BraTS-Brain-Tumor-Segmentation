@@ -1,0 +1,44 @@
+# ============================================================
+# Exp022 — Kết hợp shared/private + Học tương phản gọn nhẹ
+# Mô hình nền tảng: Exp021
+# Thay đổi: Thêm hàm mất mát tương phản phụ trợ trên các đặc trưng riêng (private features)
+# Mục tiêu: Tăng tính nhất quán cho các nhánh phương thái độc lập
+# ============================================================
+
+exp_name: "exp022"
+description: "Nhóm H Exp022 — Disentangled Fusion Lite + contrastive-aware learning"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "DisentangledFusionUNet2D"
+  architecture: "disentangled_fusion_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+  return_features: true
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+  contrastive:
+    enabled: true
+    weight: 0.1
+    temperature: 0.07
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

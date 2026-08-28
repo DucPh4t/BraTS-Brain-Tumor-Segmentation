@@ -1,0 +1,37 @@
+# ============================================================
+# Exp006 — Nhóm C: Data Augmentation (Spatial)
+# Mô hình nền tảng: Exp002
+# Thay đổi: Tăng cường dữ liệu không gian (lật xoay ảnh)
+# Mục tiêu: Giảm thiểu overfit
+# ============================================================
+
+exp_name: "exp006"
+description: "Nhóm C Exp006 — Spatial + Intensity Augmentation"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  augmentation_intensity: true
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "UNet2D"
+  in_channels: 4
+  out_channels: 3
+  init_features: 32
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice"
+  optimizer: "adam"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

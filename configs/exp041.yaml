@@ -1,0 +1,60 @@
+# ============================================================
+# Exp041 — Checkpoint Exp036 + Dự báo TTA
+# Mô hình nền tảng: Checkpoint Exp036, không huấn luyện lại
+# Thay đổi: Thêm dự báo lật ảnh TTA trong quá trình đánh giá 3D
+# Mục tiêu: Đạt kết quả dự báo tốt nhất trên mô hình cải tiến
+# ============================================================
+
+exp_name: "exp041"
+description: "Nhóm P Exp041 — Exp036 frozen checkpoint + TTA inference"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: false
+  sampling: "fixed"
+  cache_volumes: false
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "DisentangledFusionRegionHeadsUNet2D"
+  architecture: "disentangled_fusion_region_heads_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+  return_features: false
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+    hierarchy_weight: 0.1
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"
+
+evaluation:
+  source_exp: "exp036"
+  checkpoint_path: "outputs/exp036/best_model.pth"
+  split: "test"
+  batch_size: 16
+  thresholds:
+    WT: 0.5
+    TC: 0.5
+    ET: 0.5
+  tta:
+    enabled: true
+    flips: ["none", "h", "w", "hw"]
+  postprocess:
+    enabled: false
+    enforce_hierarchy: true
+  et_rescue:
+    enabled: false
+    restrict_to_tc: true

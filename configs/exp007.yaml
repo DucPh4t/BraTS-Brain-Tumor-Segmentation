@@ -1,0 +1,36 @@
+# ============================================================
+# Exp007 — Nhóm C: Data Augmentation (Intensity)
+# Mô hình nền tảng: Exp002
+# Thay đổi: Tăng cường dữ liệu cường độ sáng/tương phản
+# Mục tiêu: Tăng tính chống nhiễu
+# ============================================================
+
+exp_name: "exp007"
+description: "Nhóm D Exp007 — Weighted Sampling 3:1 tumor vs background"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "weighted"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "UNet2D"
+  in_channels: 4
+  out_channels: 3
+  init_features: 32
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice"
+  optimizer: "adam"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

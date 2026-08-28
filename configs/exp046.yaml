@@ -1,0 +1,44 @@
+# ============================================================
+# Exp046 — Exp043 + Hàm mất mát ET thích ứng theo vùng (Region-Adaptive)
+# Mô hình nền tảng: Exp043 ResNet34 + Nhánh vùng u + Ràng buộc phân cấp
+# Thay đổi: Chỉ tăng BCE của ET bên trong vùng nhãn thực tế TC
+# Mục tiêu: Giảm thiểu việc phạt quá mức ET ngoài vùng TC
+# ============================================================
+
+exp_name: "exp046"
+description: "Nhóm T Exp046 — Exp043 + region-adaptive ET BCE inside GT-TC"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "ResNet34RegionHeadsUNet2D"
+  architecture: "resnet34_region_heads_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+  encoder_weights: "imagenet"
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "region_adaptive_dice_bce"
+  loss_params:
+    dice_weight: 0.5
+    adaptive_channel: "ET"
+    adaptive_region: "TC"
+    region_multiplier: 1.5
+    hierarchy_weight: 0.1
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

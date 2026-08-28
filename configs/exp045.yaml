@@ -1,0 +1,42 @@
+# ============================================================
+# Exp045 — Exp043 + BCE gán trọng số kênh nhẹ
+# Mô hình nền tảng: Exp043 ResNet34 + Nhánh vùng u + Ràng buộc phân cấp
+# Thay đổi: Giữ nguyên Dice, gán trọng số các kênh BCE WT/TC/ET tương ứng là 1.0/1.2/1.5
+# Mục tiêu: Điều chỉnh phân phối độ tương quan của hàm mất mát cho các vùng u nhỏ
+# ============================================================
+
+exp_name: "exp045"
+description: "Nhóm S Exp045 — Exp043 + mild channel-weighted BCE for TC/ET"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "ResNet34RegionHeadsUNet2D"
+  architecture: "resnet34_region_heads_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+  encoder_weights: "imagenet"
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "weighted_dice_bce"
+  loss_params:
+    dice_weight: 0.5
+    bce_channel_weights: [1.0, 1.2, 1.5]
+    hierarchy_weight: 0.1
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

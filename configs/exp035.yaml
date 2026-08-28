@@ -1,0 +1,40 @@
+# ============================================================
+# Exp035 — Hướng 1: Shared Encoder + Disentangled Region Heads
+# Mô hình nền tảng: Exp021
+# Thay đổi: Giữ nguyên lõi fusion chung/riêng, thay đầu ra 3 kênh bằng các nhánh độc lập
+# Mục tiêu: Giảm thiểu sự giao thoa đặc trưng giữa các vùng u
+# ============================================================
+
+exp_name: "exp035"
+description: "Nhóm N Exp035 — Exp021 core + separate WT/TC/ET region heads"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "DisentangledFusionRegionHeadsUNet2D"
+  architecture: "disentangled_fusion_region_heads_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+  return_features: false
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

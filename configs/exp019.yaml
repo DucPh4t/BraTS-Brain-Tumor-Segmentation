@@ -1,0 +1,40 @@
+# ============================================================
+# Exp019 — Nhánh mã hóa riêng biệt đa phương thái (Multi-modal Separate Stems)
+# Mô hình nền tảng: Dòng pipeline tốt nhất của Exp018/Exp013
+# Thay đổi: Mỗi phương thái MRI có một nhánh mã hóa (stem) gọn nhẹ riêng trước khi fusion sớm
+# Mục tiêu: Bảo toàn đặc trưng đặc thù của từng xung phương thái
+# ============================================================
+
+exp_name: "exp019"
+description: "Nhóm G/H Exp019 — Multi-modal separate stems before U-Net fusion"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "MultiModalStemUNet2D"
+  architecture: "multimodal_stem_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+  return_features: false
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

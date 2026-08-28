@@ -1,0 +1,44 @@
+# ============================================================
+# Exp037 — Hướng 2A: Cổng dự đoán sự hiện diện / không chắc chắn của ET
+# Mô hình nền tảng: Công thức Exp036, huấn luyện từ đầu
+# Thay đổi: Thêm nhánh phụ trợ dự đoán sự hiện diện của ET từ bottleneck làm tiên nghiệm toàn cục
+# Mục tiêu: Giảm thiểu lỗi phân đoạn sai ET trên các ca không chứa ET
+# ============================================================
+
+exp_name: "exp037"
+description: "Nhóm O Exp037 — Exp036 + ET presence / uncertainty gate"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "DisentangledFusionRegionHeadsPresenceUNet2D"
+  architecture: "disentangled_fusion_region_heads_presence_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+  return_features: false
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+    hierarchy_weight: 0.1
+  et_presence:
+    enabled: true
+    weight: 0.1
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

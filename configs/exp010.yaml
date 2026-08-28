@@ -1,0 +1,40 @@
+# ============================================================
+# Exp010 — Nhóm E: Loss Function
+# Mô hình nền tảng: Exp005
+# Thay đổi: Sử dụng hàm mất mát Focal Tversky Loss
+# Mục tiêu: Tập trung vào các vùng u nhỏ
+# ============================================================
+
+exp_name: "exp010"
+description: "Nhóm E Exp010 — Focal Tversky Loss thuần"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "UNet2D"
+  in_channels: 4
+  out_channels: 3
+  init_features: 32
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "focal_tversky"
+  loss_params:
+    alpha: 0.7
+    beta: 0.3
+    gamma: 1.3333
+  optimizer: "adam"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

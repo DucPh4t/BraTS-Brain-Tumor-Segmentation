@@ -1,0 +1,19 @@
+# Core Deep Learning
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Medical Image Processing & I/O
+nibabel>=5.0.0
+medpy>=0.4.0
+scipy>=1.10.0
+numpy>=1.24.0
+
+# Experiment Configuration & Utilities
+pyyaml>=6.0
+tqdm>=4.65.0
+pandas>=2.0.0
+
+# Visualization & Plotting
+matplotlib>=3.7.0
+seaborn>=0.12.0
+imageio>=2.30.0

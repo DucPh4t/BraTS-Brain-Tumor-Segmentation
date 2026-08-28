@@ -1,0 +1,80 @@
+# ============================================================
+# Exp053 — Bộ thích ứng Mamba 2.5D độ phân giải cao được lọc qua cổng trước khi kết hợp phương thái
+# Mô hình nền tảng: Exp043 (ResNet34 + Nhánh vùng u + Ràng buộc phân cấp)
+# Thay đổi: Ngữ cảnh 60x60, tái cấu trúc phần dư có dấu và cổng lọc độ tin cậy
+# Mục tiêu: Tối ưu hóa bộ thích ứng ngữ cảnh 3D Mamba
+# ============================================================
+
+exp_name: "exp053"
+description: "Nhóm Y Exp053 — 60x60 pre-fusion 2.5D Mamba + cross-modality reliability gate + Exp043 trunk"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 5
+  min_tumor_pixels: 100
+
+model:
+  name: "HybridHighResolution2_5DMambaGatedRegionHeadsUNet"
+  architecture: "highres_gated_2_5d_mamba_region_heads_unet"
+  in_channels: 20
+  num_classes: 3
+  num_modalities: 4
+  init_features: 64
+  encoder_weights: "imagenet"
+  require_encoder_weights: true
+  adapter:
+    context_channels: [8, 32]
+    reconstruction_channels: [16, 8]
+    gate_hidden_channels: 32
+    gate_initial_value: 0.1
+    delta_scale: 1.0
+    zero_init_delta: true
+  mamba:
+    num_layers: 1
+    d_model: 32
+    d_state: 16
+    d_conv: 4
+    expand: 2
+    scan_orders: 4
+    residual_scale_init: 0.1
+    pack_scan_orders: false
+    activation_checkpointing: true
+
+training:
+  epochs: 30
+  batch_size: 16
+  gradient_accumulation_steps: 1
+  effective_batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+    hierarchy_weight: 0.1
+  optimizer: "adamw"
+  scheduler: "none"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"
+  seed: 42
+
+evaluation:
+  split: "test"
+  batch_size: 1
+  thresholds:
+    WT: 0.5
+    TC: 0.5
+    ET: 0.5
+  tta:
+    enabled: false
+  postprocess:
+    enabled: false
+    enforce_hierarchy: true
+  et_rescue:
+    enabled: false
+    restrict_to_tc: true

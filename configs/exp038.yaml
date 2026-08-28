@@ -1,0 +1,41 @@
+# ============================================================
+# Exp038 — Hướng 2B: Kết hợp shared/private đa tỷ lệ
+# Mô hình nền tảng: Công thức Exp036, huấn luyện từ đầu
+# Thay đổi: Chuyển fusion chung/riêng từ chỉ ở x1 sang mọi mức tỷ lệ của encoder
+# Mục tiêu: Đánh giá hiệu quả của fusion đa tỷ lệ
+# ============================================================
+
+exp_name: "exp038"
+description: "Nhóm O Exp038 — Exp036 + multi-scale disentangled fusion"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "DisentangledFusionMultiScaleRegionHeadsUNet2D"
+  architecture: "disentangled_fusion_multiscale_region_heads_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+  return_features: false
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+    hierarchy_weight: 0.1
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

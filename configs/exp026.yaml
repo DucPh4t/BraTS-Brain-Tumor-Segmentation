@@ -1,0 +1,72 @@
+# ============================================================
+# Exp026 — Giai đoạn I: Ngưỡng kết hợp TTA + Hậu xử lý
+# Mô hình nền tảng: Checkpoint của Exp021, không huấn luyện lại
+# Thay đổi: Tải các ngưỡng từ Exp025, tinh chỉnh lọc bỏ thành phần liên thông nhỏ
+# Mục tiêu: Loại bỏ các nhiễu đốm nhỏ dự đoán sai
+# ============================================================
+
+exp_name: "exp026"
+description: "Nhóm I Exp026 — Exp021 frozen checkpoint + TTA-aware thresholds + post-processing"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: false
+  sampling: "fixed"
+  cache_volumes: false
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "DisentangledFusionUNet2D"
+  architecture: "disentangled_fusion_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+  return_features: false
+
+training:
+  epochs: 0
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"
+
+evaluation:
+  source_exp: "exp021"
+  checkpoint_path: "outputs/exp021/best_model.pth"
+  thresholds_from_results_path: "outputs/exp025/results.json"
+  split: "test"
+  batch_size: 16
+  thresholds:
+    WT: 0.5
+    TC: 0.5
+    ET: 0.5
+  tta:
+    enabled: true
+    flips: ["none", "h", "w", "hw"]
+  postprocess:
+    enabled: true
+    enforce_hierarchy: true
+    min_component_voxels:
+      WT: 0
+      TC: 0
+      ET: 50
+    keep_largest:
+      WT: false
+      TC: false
+      ET: false
+    tune:
+      enabled: true
+      split: "val"
+      candidate_min_component_voxels:
+        WT: [0]
+        TC: [0]
+        ET: [0, 20, 50, 100]

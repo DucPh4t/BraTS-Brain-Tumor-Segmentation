@@ -1,0 +1,68 @@
+# ============================================================
+# Exp027 — Giai đoạn II: Cứu các ca lỗi ET (ET Failure Rescue)
+# Mô hình nền tảng: Dự báo kiểu Exp026, không huấn luyện lại
+# Thay đổi: Tinh chỉnh quy tắc cứu ET an toàn khi dự đoán ET rỗng
+# Mục tiêu: Khắc phục lỗi triệt tiêu nhầm ET trên các ca HGG
+# ============================================================
+
+exp_name: "exp027"
+description: "Nhóm J Exp027 — Exp021 frozen checkpoint + Exp025 thresholds + ET empty-mask rescue"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: false
+  sampling: "fixed"
+  cache_volumes: false
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "DisentangledFusionUNet2D"
+  architecture: "disentangled_fusion_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+  return_features: false
+
+training:
+  epochs: 0
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"
+
+evaluation:
+  source_exp: "exp021"
+  checkpoint_path: "outputs/exp021/best_model.pth"
+  thresholds_from_results_path: "outputs/exp025/results.json"
+  split: "test"
+  batch_size: 16
+  thresholds:
+    WT: 0.5
+    TC: 0.5
+    ET: 0.5
+  tta:
+    enabled: true
+    flips: ["none", "h", "w", "hw"]
+  postprocess:
+    enabled: false
+    enforce_hierarchy: true
+  et_rescue:
+    enabled: true
+    prob_threshold: 0.45
+    min_voxels: 10
+    restrict_to_tc: true
+    tune:
+      enabled: true
+      split: "val"
+      candidate_thresholds: [0.35, 0.40, 0.45, 0.50]
+      candidate_min_voxels: [5, 10, 20, 50]
+      candidate_restrict_to_tc: [true, false]

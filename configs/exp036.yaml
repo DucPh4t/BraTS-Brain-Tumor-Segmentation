@@ -1,0 +1,41 @@
+# ============================================================
+# Exp036 — Hướng 1: Region Heads + Hierarchy Consistency
+# Mô hình nền tảng: Exp035
+# Thay đổi: Thêm hình phạt phân cấp khả vi đảm bảo logic ET <= TC <= WT
+# Mục tiêu: Đảm bảo tính nhất quán về mặt giải phẫu của khối u
+# ============================================================
+
+exp_name: "exp036"
+description: "Nhóm N Exp036 — Exp035 region heads + hierarchy consistency loss"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "DisentangledFusionRegionHeadsUNet2D"
+  architecture: "disentangled_fusion_region_heads_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+  return_features: false
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+    hierarchy_weight: 0.1
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

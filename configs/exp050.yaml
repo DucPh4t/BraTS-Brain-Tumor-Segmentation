@@ -1,0 +1,45 @@
+# ============================================================
+# Exp050 — ResNet34 region heads + Ràng buộc phân cấp + Giám sát sâu (Deep Supervision)
+# Mô hình nền tảng: Exp043 ResNet34 + Nhánh vùng u + Ràng buộc phân cấp
+# Thay đổi: Thêm các đầu ra giải mã phụ trợ ở các kích thước 30x30, 60x60, 120x120
+# Mục tiêu: Hỗ trợ học đặc trưng ở các tỷ lệ giải mã khác nhau
+# ============================================================
+
+exp_name: "exp050"
+description: "Nhóm U Exp050 — Exp043 backbone + deep supervision"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "ResNet34RegionHeadsDeepSupervisionUNet2D"
+  architecture: "resnet34_region_heads_deep_supervision_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+  encoder_weights: "imagenet"
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+    hierarchy_weight: 0.1
+  deep_supervision:
+    enabled: true
+    weight: 0.3
+    weights: [0.5, 0.25, 0.125]
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

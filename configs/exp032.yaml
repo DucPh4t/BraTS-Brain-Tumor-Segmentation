@@ -1,0 +1,74 @@
+# ============================================================
+# Exp032 — Giai đoạn M: Kết hợp shared/private + Attention
+# Mô hình nền tảng: Chọn checkpoint theo đánh giá 3D của Exp031
+# Thay đổi: Thêm các kết nối tắt decoder lọc qua cổng chú ý trên nền kết hợp Exp021
+# Mục tiêu: Giảm nhiễu và nhầm lẫn giữa các phân vùng u phụ
+# ============================================================
+
+exp_name: "exp032"
+description: "Nhóm M Exp032 — Disentangled Fusion Attention U-Net with 3D validation checkpoint"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "DisentangledFusionAttentionUNet2D"
+  architecture: "disentangled_fusion_attention_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+  return_features: false
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"
+
+validation_3d:
+  enabled: true
+  interval_epochs: 5
+  monitor: "mean_dice"
+  include_hd95: false
+  batch_size: 16
+  thresholds:
+    WT: 0.5
+    TC: 0.5
+    ET: 0.5
+  tta:
+    enabled: false
+  postprocess:
+    enabled: false
+    enforce_hierarchy: true
+  et_rescue:
+    enabled: false
+
+evaluation:
+  checkpoint_path: "outputs/exp032/best_model_3d.pth"
+  split: "test"
+  batch_size: 16
+  thresholds:
+    WT: 0.5
+    TC: 0.5
+    ET: 0.5
+  tta:
+    enabled: false
+  postprocess:
+    enabled: false
+    enforce_hierarchy: true
+  et_rescue:
+    enabled: false

@@ -1,0 +1,74 @@
+# ============================================================
+# Exp031 — Giai đoạn M: Baseline giao thức mới lưu checkpoint đánh giá 3D
+# Mô hình nền tảng: Kết hợp shared/private Exp021
+# Thay đổi: Giữ file best_model.pth đánh giá theo lát và lưu thêm best_model_3d.pth theo 3D
+# Mục tiêu: Tạo giao thức checkpoint chính xác hơn
+# ============================================================
+
+exp_name: "exp031"
+description: "Nhóm M Exp031 — Exp021 recipe rerun with 3D validation checkpoint selection"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "DisentangledFusionUNet2D"
+  architecture: "disentangled_fusion_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+  return_features: false
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"
+
+validation_3d:
+  enabled: true
+  interval_epochs: 5
+  monitor: "mean_dice"
+  include_hd95: false
+  batch_size: 16
+  thresholds:
+    WT: 0.5
+    TC: 0.5
+    ET: 0.5
+  tta:
+    enabled: false
+  postprocess:
+    enabled: false
+    enforce_hierarchy: true
+  et_rescue:
+    enabled: false
+
+evaluation:
+  checkpoint_path: "outputs/exp031/best_model_3d.pth"
+  split: "test"
+  batch_size: 16
+  thresholds:
+    WT: 0.5
+    TC: 0.5
+    ET: 0.5
+  tta:
+    enabled: false
+  postprocess:
+    enabled: false
+    enforce_hierarchy: true
+  et_rescue:
+    enabled: false

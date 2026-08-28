@@ -1,0 +1,40 @@
+# ============================================================
+# Exp016 — Nhóm F: Optimizer & Scheduler
+# Mô hình nền tảng: Exp013
+# Thay đổi: AdamW kết hợp Polynomial Decay (power=0.9)
+# Mục tiêu: Tối ưu hóa tốc độ học theo đa thức
+# ============================================================
+
+exp_name: "exp016"
+description: "Nhóm F Exp016 — AdamW + Polynomial Decay (power=0.9)"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "UNet2D"
+  in_channels: 4
+  out_channels: 3
+  init_features: 32
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+  optimizer: "adamw"
+  scheduler: "polynomial"
+  scheduler_power: 0.9
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

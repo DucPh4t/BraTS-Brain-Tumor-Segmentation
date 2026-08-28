@@ -1,0 +1,46 @@
+# ============================================================
+# Exp040 — Ứng viên đầy đủ: Kết hợp các module lựa chọn
+# Mô hình nền tảng: Hướng Exp036, huấn luyện từ đầu
+# Thay đổi: Kết hợp fusion đa tỷ lệ, cổng sự hiện diện ET, ràng buộc phân cấp và ranh giới
+# Mục tiêu: Tối đa hóa sức mạnh của toàn bộ các giải pháp cải tiến
+# ============================================================
+
+exp_name: "exp040"
+description: "Nhóm O Exp040 — full candidate: multi-scale fusion + ET presence + boundary"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: true
+  sampling: "fixed"
+  cache_volumes: true
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "DisentangledFusionMultiScalePresenceUNet2D"
+  architecture: "disentangled_fusion_multiscale_presence_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+  return_features: false
+
+training:
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+    hierarchy_weight: 0.1
+    boundary_weight: 0.05
+    boundary_kernel_size: 3
+  et_presence:
+    enabled: true
+    weight: 0.1
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"

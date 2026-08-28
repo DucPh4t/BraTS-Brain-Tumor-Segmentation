@@ -1,0 +1,65 @@
+# ============================================================
+# Exp030 — Giai đoạn L: Checkpoint Attention + Tinh chỉnh ngưỡng kết hợp TTA
+# Mô hình nền tảng: Checkpoint của Exp018, không huấn luyện lại
+# Thay đổi: Tinh chỉnh ngưỡng WT/TC/ET kết hợp TTA trên mô hình Attention
+# Mục tiêu: Tối ưu hóa ngưỡng dự phòng cho Attention
+# ============================================================
+
+exp_name: "exp030"
+description: "Nhóm L Exp030 — Exp018 Attention U-Net + TTA-aware threshold tuning"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: false
+  sampling: "fixed"
+  cache_volumes: false
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "AttentionUNet2D"
+  architecture: "attention_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+
+training:
+  epochs: 0
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"
+
+evaluation:
+  source_exp: "exp018"
+  checkpoint_path: "outputs/exp018/best_model.pth"
+  split: "test"
+  batch_size: 16
+  thresholds:
+    WT: 0.5
+    TC: 0.5
+    ET: 0.5
+  tta:
+    enabled: true
+    flips: ["none", "h", "w", "hw"]
+  threshold_tuning:
+    enabled: true
+    split: "val"
+    top_k_hd95: 5
+    grids:
+      WT: [0.45, 0.50, 0.55]
+      TC: [0.40, 0.45, 0.50, 0.55]
+      ET: [0.30, 0.35, 0.40, 0.45, 0.50]
+  postprocess:
+    enabled: false
+    enforce_hierarchy: true
+  et_rescue:
+    enabled: false

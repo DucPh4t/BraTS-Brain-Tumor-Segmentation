@@ -1,0 +1,74 @@
+# ============================================================
+# Exp051 — Exp043 + Lọc bỏ thành phần liên thông ET nhỏ tinh chỉnh trên tập validation
+# Mô hình nền tảng: Exp043 ResNet34 + Nhánh vùng u + Ràng buộc phân cấp
+# Thay đổi: Không huấn luyện lại; tinh chỉnh lọc thành phần liên thông nhỏ của ET trên validation
+# Mục tiêu: Lọc nhiễu ET trên các ca LGG không chứa ET
+# ============================================================
+
+exp_name: "exp051"
+description: "Nhóm V Exp051 — Exp043 frozen checkpoint + validation-tuned ET connected-component cleanup"
+
+data:
+  root_dir: "KAGGLE_PATH"
+  split_type: "stratified"
+  slice_range: [0, 155]
+  normalization: "zscore_clip"
+  augmentation: false
+  sampling: "fixed"
+  cache_volumes: false
+  context_slices: 0
+  min_tumor_pixels: 100
+
+model:
+  name: "ResNet34RegionHeadsUNet2D"
+  architecture: "resnet34_region_heads_unet2d"
+  in_channels: 4
+  num_classes: 3
+  init_features: 64
+  encoder_weights: "imagenet"
+
+training:
+  epochs: 0
+  batch_size: 16
+  lr: 0.0001
+  loss: "dice_bce"
+  loss_params:
+    dice_weight: 0.5
+    hierarchy_weight: 0.1
+  optimizer: "adamw"
+  num_workers: 0
+  pin_memory: true
+  monitor_metric: "mean_val_dice"
+
+evaluation:
+  source_exp: "exp043"
+  checkpoint_path: "outputs/exp043/best_model.pth"
+  split: "test"
+  batch_size: 16
+  thresholds:
+    WT: 0.5
+    TC: 0.5
+    ET: 0.5
+  tta:
+    enabled: false
+  postprocess:
+    enabled: true
+    enforce_hierarchy: true
+    min_component_voxels:
+      WT: 0
+      TC: 0
+      ET: 0
+    keep_largest:
+      WT: false
+      TC: false
+      ET: false
+    tune:
+      enabled: true
+      split: "val"
+      candidate_min_component_voxels:
+        WT: [0]
+        TC: [0]
+        ET: [0, 20, 50, 100, 200]
+  et_rescue:
+    enabled: false
+    restrict_to_tc: true
