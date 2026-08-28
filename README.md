@@ -35,7 +35,7 @@ Nghiên cứu này tập trung vào việc phát triển một hệ thống họ
 2. **Khai thác ngữ cảnh không gian 3D**: Thiết kế mô hình thích ứng **Hybrid 2.5D Mamba Adapter** đặt tại bottleneck, tận dụng ưu thế mô hình hóa chuỗi tuần tự hai chiều (Bidirectional Selective State Space) của Mamba để tích hợp ngữ cảnh đa lát cắt trục (axial slices) mà không gây bùng nổ tài nguyên tính toán như tích chập 3D.
 3. **Mất nhất quán cấu trúc giải phẫu học**: Xây dựng hàm mất mát phân cấp vùng u khả vi **Region-Hierarchy Loss ($\mathcal{L}_{\text{hier}}$)** nhằm ép buộc xác suất dự đoán tuân thủ chặt chẽ ràng buộc giải phẫu sinh học của các phân vùng u BraTS: Vùng tăng cường (ET) phải nằm trong lõi u (TC), và lõi u phải nằm trong toàn bộ vùng u (WT) ($P_{\text{ET}} \le P_{\text{TC}} \le P_{\text{WT}}$).
 
-Kết quả thực nghiệm đạt chỉ số **Mean Dice vượt trội 87.1%** trên tập dữ liệu đánh giá 3D BraTS 2020 và thể hiện khả năng tổng quát hóa xuất sắc khi đánh giá chéo trên tập BraTS 2023 GLI mà không cần huấn luyện lại.
+Kết quả thực nghiệm mô hình xuất sắc nhất (Exp043) đạt chỉ số **Mean Dice 85.51%** trên tập dữ liệu 3D BraTS 2020 và thể hiện khả năng tổng quát hóa xuất sắc **86.68% Mean Dice** (TC Dice đạt **87.25%**) khi đánh giá chéo trên tập dữ liệu ngoại lai BraTS 2023 GLI mà không cần huấn luyện lại.
 
 ---
 
@@ -269,7 +269,7 @@ pip install -r requirements.txt
 ---
 
 ### 3. Cài đặt Mamba-SSM (Chỉ dành cho GPU NVIDIA trên Windows / Linux / Kaggle / Colab)
-Dành cho các thí nghiệm từ `exp043` trở đi có sử dụng kiến trúc Mamba bottleneck (Yêu cầu CUDA toolkit):
+Dành cho các thí nghiệm `exp052` / `exp053` có sử dụng kiến trúc Mamba bottleneck (Yêu cầu CUDA toolkit):
 ```bash
 pip install -r requirements-mamba.txt --no-build-isolation
 ```
@@ -281,7 +281,7 @@ pip install -r requirements-mamba.txt --no-build-isolation
 ### 1. Huấn luyện Mô hình
 Chạy huấn luyện một thí nghiệm bất kỳ bằng lệnh `main.py` chỉ định file cấu hình:
 ```bash
-# Ví dụ: Huấn luyện mô hình Hybrid 2.5D Mamba U-Net (Exp043)
+# Ví dụ: Huấn luyện mô hình ResNet34 Region-Heads U-Net (Exp043)
 python main.py --config configs/exp043.yaml --mode train
 ```
 
