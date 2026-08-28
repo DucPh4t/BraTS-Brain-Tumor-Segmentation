@@ -33,7 +33,7 @@
 Nghiên cứu này tập trung vào việc phát triển một hệ thống học sâu hiệu năng cao để phân đoạn tự động các cấu trúc khối u não trên ảnh MRI đa phương thái (gồm các xung FLAIR, T1, T1ce, và T2) thuộc hai tập dữ liệu chuẩn thức **BraTS 2020** và **BraTS 2023 GLI**. Khung nghiên cứu thực nghiệm được thiết kế có hệ thống thông qua **53 cấu hình thí nghiệm** lũy tiến nhằm giải quyết ba thách thức cốt lõi:
 1. **Sự tương tác phức tạp giữa các phương thái MRI**: Đề xuất mô hình kết hợp đa tỷ lệ **Disentangled Feature Fusion** tách biệt các nhánh encoder riêng (`private stems`) cho từng xung trước khi đưa vào không gian biểu diễn chung (`shared trunk`), giúp giữ lại tối đa đặc trưng vật lý của từng loại ảnh.
 2. **Khai thác ngữ cảnh không gian 3D**: Thiết kế mô hình thích ứng **Hybrid 2.5D Mamba Adapter** đặt tại bottleneck, tận dụng ưu thế mô hình hóa chuỗi tuần tự hai chiều (Bidirectional Selective State Space) của Mamba để tích hợp ngữ cảnh đa lát cắt trục (axial slices) mà không gây bùng nổ tài nguyên tính toán như tích chập 3D.
-3. **Mất nhất quán cấu trúc giải phẫu học**: Xây dựng hàm mất mát phân cấp vùng u khả vi **Region-Hierarchy Loss ($\mathcal{L}_{hier}$)** nhằm ép buộc xác suất dự đoán tuân thủ chặt chẽ ràng buộc giải phẫu sinh học của các phân vùng u BraTS: Vùng tăng cường (ET) phải nằm trong lõi u (TC), và lõi u phải nằm trong toàn bộ vùng u (WT) ($P_{ET} \le P_{TC} \le P_{WT}$).
+3. **Mất nhất quán cấu trúc giải phẫu học**: Xây dựng hàm mất mát phân cấp vùng u khả vi **Region-Hierarchy Loss ($\mathcal{L}_{\text{hier}}$)** nhằm ép buộc xác suất dự đoán tuân thủ chặt chẽ ràng buộc giải phẫu sinh học của các phân vùng u BraTS: Vùng tăng cường (ET) phải nằm trong lõi u (TC), và lõi u phải nằm trong toàn bộ vùng u (WT) ($P_{\text{ET}} \le P_{\text{TC}} \le P_{\text{WT}}$).
 
 Kết quả thực nghiệm đạt chỉ số **Mean Dice vượt trội 87.1%** trên tập dữ liệu đánh giá 3D BraTS 2020 và thể hiện khả năng tổng quát hóa xuất sắc khi đánh giá chéo trên tập BraTS 2023 GLI mà không cần huấn luyện lại.
 
@@ -60,7 +60,11 @@ Kết quả thực nghiệm đạt chỉ số **Mean Dice vượt trội 87.1%**
 
 ### 2. Chỉ số Đánh giá (Evaluation Metrics)
 - **Dice Similarity Coefficient (DSC)**: Đo lường mức độ trùng lặp không gian giữa mặt nạ dự đoán ($P$) và Ground Truth ($G$):
-  $$\text{Dice}(P, G) = \frac{2 |P \cap G|}{|P| + |G|}$$
+
+$$
+\text{Dice}(P, G) = \frac{2 |P \cap G|}{|P| + |G|}
+$$
+
 - **Hausdorff Distance 95th Percentile (HD95)**: Khoảng cách lớn nhất thứ 95% giữa các điểm trên ranh giới bề mặt u dự đoán và thực tế (tính bằng mm), đo lường độ chính xác biên u.
 
 ---
@@ -137,12 +141,19 @@ graph TD
 ## 📐 Mathematical Formulations
 
 ### 1. Hàm Mất mát Phân cấp Vùng u (Region-Hierarchy Loss)
-Đảm bảo tính phụ thuộc không gian giải phẫu sinh học giữa các vùng u BraTS ($P_{ET} \le P_{TC} \le P_{WT}$):
-$$\mathcal{L}_{hier} = \frac{1}{N} \sum_{i=1}^{N} \left( \max(0, P_{ET, i} - P_{TC, i}) + \max(0, P_{TC, i} - P_{WT, i}) \right)$$
+Đảm bảo tính phụ thuộc không gian giải phẫu sinh học giữa các vùng u BraTS ($P_{\text{ET}} \le P_{\text{TC}} \le P_{\text{WT}}$):
+
+$$
+\mathcal{L}_{\text{hier}} = \frac{1}{N} \sum_{i=1}^{N} \left( \max(0, P_{\text{ET}, i} - P_{\text{TC}, i}) + \max(0, P_{\text{TC}, i} - P_{\text{WT}, i}) \right)
+$$
 
 ### 2. Hàm Mất mát Tổng hợp (Combined Training Loss)
-$$\mathcal{L}_{total} = w_{dice} \mathcal{L}_{Dice} + w_{bce} \mathcal{L}_{BCE} + w_{hier} \mathcal{L}_{hier}$$
-*Trong đó $w_{dice} = 0.5$, $w_{bce} = 0.5$, và $w_{hier} = 0.1$.*
+
+$$
+\mathcal{L}_{\text{total}} = w_{\text{dice}} \mathcal{L}_{\text{Dice}} + w_{\text{bce}} \mathcal{L}_{\text{BCE}} + w_{\text{hier}} \mathcal{L}_{\text{hier}}
+$$
+
+*Trong đó các trọng số được cấu hình: $w_{\text{dice}} = 0.5$, $w_{\text{bce}} = 0.5$, và $w_{\text{hier}} = 0.1$.*
 
 ---
 
